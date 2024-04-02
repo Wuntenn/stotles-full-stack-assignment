@@ -40,7 +40,7 @@ export class ProcurementRecord extends Model {
 
   @AllowNull
   @Column(DataType.STRING)
-  currency!: string | null;
+  currency!: string | null; // Would use enum of currency codes eg: GBP, JPY, NZD
 
   @Column
   created_at!: string;

@@ -39,6 +39,22 @@ function RecordsTable(props: Props) {
         title: "Buyer name",
         render: (record: ProcurementRecord) => record.buyer.name,
       },
+      {
+        title: "Value",
+        render: (record: ProcurementRecord) => record.value && `${record.value} ${record.currency}`,
+      },
+      {
+        title: "Stage",
+        render: (record: ProcurementRecord) => {
+          const isTender = record.stage === "TENDER";
+          const closeDateIsTruthyAndWithinTime = record.closeDate && new Date(record.closeDate).toISOString() > new Date(Date.now()).toISOString();
+          const closeDate = new Date(record.closeDate).toLocaleDateString()
+          const awardDate = new Date(record.closeDate).toLocaleDateString()
+          let status = isTender ? (closeDateIsTruthyAndWithinTime ? `Open until ${closeDate}` : 'Closed') : `Awarded on ${awardDate}`;
+          
+          return status;
+        }
+      }
     ];
   }, []);
   return (

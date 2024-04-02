@@ -13,7 +13,12 @@ export type ProcurementRecord = {
     id: string;
     name: string;
   };
-};
+  value: number;
+  currency?: string;
+  stage: string;
+  awardDate?: string;
+  closeDate?: string;
+}
 
 export type SearchRecordsResponse = {
   records: ProcurementRecord[];
