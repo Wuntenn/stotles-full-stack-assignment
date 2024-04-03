@@ -14,8 +14,6 @@ function RecordsTable(props: Props) {
     ProcurementRecord | undefined
   >();
 
-  //console.log('records: ', records);
-
   const pData = records.map((record) => { 
     const cell =  { ...record, key: record.id } ;
     return cell;

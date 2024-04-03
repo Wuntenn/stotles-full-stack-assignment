@@ -50,8 +50,6 @@ async function searchRecords({
   // Not sure how to perform join using sequelize raw queries. Unable to supply with two models
   let buyerIds: string[] | undefined = null;
 
-  console.log(`Buyer Filter: ${buyerFilter} and textSearch: ${textSearch}`);
-
   if (buyerFilter) {
     const buyers = await sequelize.query(
       "SELECT * FROM buyers WHERE name LIKE (:buyerFilter)",
@@ -64,15 +62,11 @@ async function searchRecords({
     ); 
 
     buyerIds = buyers.map(b => b.id);
-    console.log(` -> buyersNames: ${JSON.stringify(buyers)}`);
-    console.log(` -> buyersIds: ${buyerIds}`);
   }
 
   const sqlExpWithBuyer = "SELECT * FROM procurement_records WHERE buyer_id IN (:buyers) AND (title LIKE :textSearch OR description LIKE :descSearch) LIMIT :limit OFFSET :offset"
   const sqlExpWithoutBuyer = "SELECT * FROM procurement_records WHERE (title LIKE :textSearch OR description LIKE :descSearch) LIMIT :limit OFFSET :offset"
-
   const queryFinal = buyerFilter ? sqlExpWithBuyer : sqlExpWithoutBuyer;
-  console.log('final query:', buyerFilter ? 'withProc' : 'no');
 
   if (textSearch || buyerFilter) {
     return await sequelize.query(

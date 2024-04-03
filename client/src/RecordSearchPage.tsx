@@ -56,7 +56,6 @@ function RecordSearchPage(props: Props) {
       setReachedEndOfSearch(response.endOfResults);
     })();
 
-    console.log('buyerFilter: ', buyerFilter);
   }, [searchFilters, page, buyerFilter]);
 
   const handleChangeFilters = React.useCallback((newFilters: SearchFilters) => {
