@@ -4,8 +4,12 @@ import { Content, Footer, Header } from "antd/lib/layout/layout";
 import RecordSearchPage from "./RecordSearchPage";
 import Sider from "antd/lib/layout/Sider";
 import "./App.css";
+import SideFilter from "./SideFilter";
+import React from "react";
 
 function App() {
+  const [buyerSearch, setBuyerSearch] = React.useState('');
+
   return (
     <Layout style={{ minHeight: "100vh" }} hasSider>
       <Sider>
@@ -27,7 +31,8 @@ function App() {
             className="site-layout-background"
             style={{ padding: 24, minHeight: 360 }}
           >
-            <RecordSearchPage />
+            <SideFilter currentVal={buyerSearch} setterCB={setBuyerSearch}/>
+            <RecordSearchPage buyerFilter={buyerSearch}/>
           </div>
         </Content>
         <Footer style={{ textAlign: "center" }}>

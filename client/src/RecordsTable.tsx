@@ -14,6 +14,13 @@ function RecordsTable(props: Props) {
     ProcurementRecord | undefined
   >();
 
+  //console.log('records: ', records);
+
+  const pData = records.map((record) => { 
+    const cell =  { ...record, key: record.id } ;
+    return cell;
+  }) 
+
   const columns = React.useMemo<ColumnType<ProcurementRecord>[]>(() => {
     return [
       {
@@ -45,21 +52,22 @@ function RecordsTable(props: Props) {
       },
       {
         title: "Stage",
+
         render: (record: ProcurementRecord) => {
           const isTender = record.stage === "TENDER";
           const closeDateIsTruthyAndWithinTime = record.closeDate && new Date(record.closeDate).toISOString() > new Date(Date.now()).toISOString();
           const closeDate = new Date(record.closeDate).toLocaleDateString()
           const awardDate = new Date(record.closeDate).toLocaleDateString()
           let status = isTender ? (closeDateIsTruthyAndWithinTime ? `Open until ${closeDate}` : 'Closed') : `Awarded on ${awardDate}`;
-          
           return status;
         }
       }
     ];
   }, []);
   return (
+
     <>
-      <Table columns={columns} dataSource={records} pagination={false} />
+      <Table columns={columns} dataSource={pData} pagination={false} />
       <ProcurementRecordPreviewModal
         record={previewedRecord}
         onClose={() => setPreviewedRecord(undefined)}

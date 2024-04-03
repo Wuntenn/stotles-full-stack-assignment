@@ -18,7 +18,14 @@ import RecordsTable from "./RecordsTable";
 
 const PAGE_SIZE = 10;
 
-function RecordSearchPage() {
+type Props = {
+  buyerFilter?: string
+}
+
+function RecordSearchPage(props: Props) {
+  const { buyerFilter } = props;
+
+
   const [page, setPage] = React.useState<number>(1);
   const [searchFilters, setSearchFilters] = React.useState<SearchFilters>({
     query: "",
@@ -35,6 +42,7 @@ function RecordSearchPage() {
       const api = new Api();
       const response = await api.searchRecords({
         textSearch: searchFilters.query,
+        buyerFilter,
         limit: PAGE_SIZE,
         offset: PAGE_SIZE * (page - 1),
       });
@@ -47,7 +55,9 @@ function RecordSearchPage() {
       }
       setReachedEndOfSearch(response.endOfResults);
     })();
-  }, [searchFilters, page]);
+
+    console.log('buyerFilter: ', buyerFilter);
+  }, [searchFilters, page, buyerFilter]);
 
   const handleChangeFilters = React.useCallback((newFilters: SearchFilters) => {
     setSearchFilters(newFilters);

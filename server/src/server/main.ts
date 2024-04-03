@@ -40,27 +40,50 @@ app.get("/", (_req, res) => {
 
 app.use(express.json());
 
-type RecordSearchFilters = {
-  textSearch?: string;
-};
 
 /**
  * Queries the database for procurement records according to the search filters.
  */
-async function searchRecords(
-  { textSearch }: RecordSearchFilters,
-  offset: number,
-  limit: number
-): Promise<ProcurementRecord[]> {
-  if (textSearch) {
+async function searchRecords({
+  textSearch, buyerFilter, offset, limit
+} : RecordSearchRequest): Promise<ProcurementRecord[]> {
+  // Not sure how to perform join using sequelize raw queries. Unable to supply with two models
+  let buyerIds: string[] | undefined = null;
+
+  console.log(`Buyer Filter: ${buyerFilter} and textSearch: ${textSearch}`);
+
+  if (buyerFilter) {
+    const buyers = await sequelize.query(
+      "SELECT * FROM buyers WHERE name LIKE (:buyerFilter)",
+      {
+        model: Buyer,
+        replacements: {
+          buyerFilter: `%${buyerFilter}%`,
+        },
+      }
+    ); 
+
+    buyerIds = buyers.map(b => b.id);
+    console.log(` -> buyersNames: ${JSON.stringify(buyers)}`);
+    console.log(` -> buyersIds: ${buyerIds}`);
+  }
+
+  const sqlExpWithBuyer = "SELECT * FROM procurement_records WHERE buyer_id IN (:buyers) AND (title LIKE :textSearch OR description LIKE :descSearch) LIMIT :limit OFFSET :offset"
+  const sqlExpWithoutBuyer = "SELECT * FROM procurement_records WHERE (title LIKE :textSearch OR description LIKE :descSearch) LIMIT :limit OFFSET :offset"
+
+  const queryFinal = buyerFilter ? sqlExpWithBuyer : sqlExpWithoutBuyer;
+  console.log('final query:', buyerFilter ? 'withProc' : 'no');
+
+  if (textSearch || buyerFilter) {
     return await sequelize.query(
-      "SELECT * FROM procurement_records WHERE title LIKE :textSearch \
-        OR description LIKE :descSearch LIMIT :limit OFFSET :offset",
+      queryFinal,
       {
         model: ProcurementRecord, // by setting this sequelize will return a list of ProcurementRecord objects
         replacements: {
           textSearch: `%${textSearch}%`,
           descSearch: `%${textSearch}%`,
+          buyerFilter: `%${buyerFilter}%`,
+          buyers: buyerIds,
           offset: offset,
           limit: limit,
         },
@@ -159,13 +182,12 @@ app.post("/api/records", async (req, res) => {
   // If number of returned records is larger than
   // the requested limit it means there is more data than requested
   // and the client can fetch the next page.
-  const records = await searchRecords(
-    {
-      textSearch: requestPayload.textSearch,
-    },
-    offset,
-    limit + 1
-  );
+  const records = await searchRecords({
+    textSearch: requestPayload.textSearch,
+    buyerFilter: requestPayload.buyerFilter,
+    offset: offset,
+    limit: limit + 1
+  });
 
   const response: RecordSearchResponse = {
     records: await serializeProcurementRecords(
